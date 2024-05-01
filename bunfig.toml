@@ -1,0 +1,8 @@
+jsx = "react"
+logLevel = "debug"
+telemetry = false
+
+[test]
+root = "."
+coverage = true
+coverageThreshold = {line = 0.9, function = 0.9, statement = 0.9}
