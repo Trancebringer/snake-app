@@ -1,7 +1,7 @@
 export enum SnakePartType {
-    head,
-    body,
-    tail,
+    head = 'head',
+    body = 'body',
+    tail = 'tail',
 }
 
 export enum Direction {
@@ -12,8 +12,8 @@ export enum Direction {
 }
 
 export enum CellContainment {
-    snake,
-    apple,
-    obstacle,// todo: Add obstacle implementation
-    empty,
+    snake = 'snake',
+    apple = 'apple',
+    obstacle = 'obstacle',// todo: Add obstacle implementation
+    empty = 'empty',
 }

@@ -1,7 +1,7 @@
-import Row from "./row";
-import Cell, {CellData} from "./cell";
+import { Coords } from "../../interfaces";
 import BaseList from "./baseList";
-import {Coords} from "../../interfaces";
+import Cell, { CellData } from "./cell";
+import Row, { InputCellDataList } from "./row";
 
 export interface Size {w: number, l: number}
 
@@ -9,7 +9,7 @@ export default class Net extends BaseList{
     net: Row[];
     #size: Size;
 
-    constructor(size: number | Size, data?: CellData[][]) {
+    constructor(size: number | Size, data?: InputCellDataList[]) {
         super();
         this.#size = typeof size === 'number' ? {w: size, l: size} : size;
         this.net = this.listFromData(this.#size.l, (index, rowData) => new Row(index, this.#size.w, rowData), data);
@@ -17,7 +17,8 @@ export default class Net extends BaseList{
 
     public getCellByCoords(coords: Coords) {
         const {x, y} = coords;
-        if (y > this.#size.l || y < 1) {
+        if (y > this.#size.l || y < 0) {
+            console.log({ size: this.#size, coords })
             throw new Error('NET: provided Y is out of range');
         }
         const desiredRow = this.net[y];
@@ -31,7 +32,7 @@ export default class Net extends BaseList{
     }
 
     public generateApple() {
-        const unoccupied = this.net.flatMap((row) => row.getGoingToUnoccupiedCells());
+        const unoccupied = this.net.flatMap((row) => row.getGoingToBeEmptyCells());
         const index = this.getRandomTo(unoccupied.length);
         unoccupied[index].putApple();
     }

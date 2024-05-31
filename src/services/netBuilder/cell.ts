@@ -1,10 +1,38 @@
-import {CellContainment, Direction, SnakePartType} from "./enums";
-import {Coords} from "../../interfaces";
+import { Coords } from "../../interfaces";
+import { CellContainment, Direction, SnakePartType } from "./enums";
+
+// type PartialExcept<O extends object, ExceptKey extends keyof O> = Partial<Exclude<O, ExceptKey>> & Pick<O, ExceptKey>;
 
 export interface CellData {
     contains: CellContainment;
     meta: null | SnakePart;
     coords: Coords;
+}
+
+// export type InputCellData = PartialExcept<CellData, 'coords'>
+
+interface BaseCellData {
+    coords: Coords;
+}
+
+interface CellDataWithSnake extends BaseCellData {
+    contains: CellContainment.snake;
+    meta: SnakePart;
+}
+
+interface CellDataWithoutSnake extends BaseCellData {
+    contains: Exclude<CellContainment, CellContainment.snake>
+    meta?: null;
+}
+
+export type InputCellData = BaseCellData | CellDataWithSnake | CellDataWithoutSnake;
+
+export type InputCellDataWithoutCoords = {
+    contains: CellContainment.snake;
+    meta: SnakePart;
+} | {
+    contains: Exclude<CellContainment, CellContainment.snake>
+    meta?: null;
 }
 
 export interface SnakePart {
@@ -20,22 +48,18 @@ export default class Cell implements CellData{
     #appleEaten: boolean;
     #nextState?: Cell;
 
-    constructor(x: number, y: number, data?: CellData, appleEaten = false) {
-        this.coords = {
-            x: x,
-            y: y,
-        };
+    constructor(inputData: InputCellData, appleEaten = false) {
+        this.coords = inputData.coords;
         this.#appleEaten = appleEaten;
-        if (!data) {
-            return
+        if ('contains' in inputData) {
+            this.contains = inputData.contains;
+            this.meta = inputData.meta || null;
         }
-        this.contains = data.contains;
-        this.meta = data.meta;
     }
 
     get isAppleEaten() {
         const result = this.#appleEaten;
-        this.#appleEaten = false; // todo: May be unnecessary
+        // this.#appleEaten = false; // todo: May be unnecessary
         return result;
     }
 
@@ -65,7 +89,7 @@ export default class Cell implements CellData{
             inputDirection: Direction.east,
             outputDirection: Direction.east,
         }
-        this.#nextState = new Cell(this.coords.x, this.coords.y, stateCopy)
+        this.copyWithState(stateCopy);
     }
 
     public putApple() {
@@ -75,7 +99,7 @@ export default class Cell implements CellData{
         const copiedState = this.toData();
         copiedState.contains = CellContainment.apple;
         copiedState.meta = null;
-        this.#nextState = new Cell(this.coords.x, this.coords.y, copiedState);
+        this.copyWithState(copiedState);
     }
 
     public enterSnake(enterDirection: Direction) {
@@ -83,7 +107,7 @@ export default class Cell implements CellData{
         switch (true) {
             case this.contains === CellContainment.obstacle:
                 throw new Error('Snake hit an obstacle');
-            case this.contains === CellContainment.snake && this.meta?.type !== SnakePartType.tail:
+            case this.contains === CellContainment.snake:
                 throw new Error('Snake bite itself');
             default:
                 copiedState.contains = CellContainment.snake;
@@ -107,11 +131,11 @@ export default class Cell implements CellData{
         if (this.meta.type === SnakePartType.tail) {
             copiedState.contains = CellContainment.empty;
             copiedState.meta = null;
-            return;
-        }
-        copiedState.meta = {
-            ...this.meta,
-            type: this.meta.type === SnakePartType.head ? SnakePartType.body : SnakePartType.tail,
+        } else {
+            copiedState.meta = {
+                ...this.meta,
+                type: this.meta.type === SnakePartType.head ? SnakePartType.body : SnakePartType.tail, // TODO: this implementation expects snake to be always 3 parts of a length
+            }
         }
         this.copyWithState(copiedState);
     }
@@ -124,7 +148,7 @@ export default class Cell implements CellData{
         }
     }
 
-    private copyWithState(copiedState?: CellData, appleEaten = false) {
-        this.#nextState = new Cell(this.coords.x, this.coords.y, copiedState || this.toData(), appleEaten);
+    private copyWithState(copiedState?: CellData, appleEaten = this.#appleEaten) {
+        this.#nextState = new Cell(copiedState || this.toData(), appleEaten);
     }
 };

@@ -1,0 +1,1 @@
+export const MIN_FIELD_SIZE = 5;

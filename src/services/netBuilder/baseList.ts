@@ -1,7 +1,7 @@
 import Cell from "./cell";
 
 export default class BaseList {
-    listFromData(size: number, newItemCb: (i: number, data?: any) => any, data?: any[]) {
+    listFromData<D extends object>(size: number, newItemCb: (i: number, data?: D) => any, data?: Array<D>) {
         if (!data) {
             return this.getDefaultItemArray(size, newItemCb);
         }
@@ -10,7 +10,7 @@ export default class BaseList {
         }
         return [
             ...data.map((cellData, index) => newItemCb(index, cellData)),
-            ...this.getDefaultItemArray(size - data.length, newItemCb, true),
+            ...this.getDefaultItemArray(size - data.length, newItemCb, data.length),
         ];
     }
 
@@ -19,8 +19,7 @@ export default class BaseList {
         return Math.round(rand * to);
     }
 
-    private getDefaultItemArray(size: number, newItemCb: (i: number, data?: any) => any, addSizeToIndex: boolean = false): Cell[] {
-        const addedIndex = addSizeToIndex ? size : 0;
-        return Array.from(new Array(size), (el, index) => newItemCb(index + addedIndex));
+    private getDefaultItemArray(size: number, newItemCb: (i: number, data?: any) => any, startFrom = 0): Cell[] {
+        return Array.from(new Array(size), (el, index) => newItemCb(index + startFrom));
     }
 }
