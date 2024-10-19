@@ -1,9 +1,8 @@
 import { Coords } from "../../interfaces";
+import SnakeCell from "../snake/snakeCell";
 import BaseList from "./baseList";
-import Cell, { CellData } from "./cell";
+import { CellData, Size } from "./interface";
 import Row, { InputCellDataList } from "./row";
-
-export interface Size {w: number, l: number}
 
 export default class Net extends BaseList{
     net: Row[];
@@ -18,15 +17,15 @@ export default class Net extends BaseList{
     public getCellByCoords(coords: Coords) {
         const {x, y} = coords;
         if (y > this.#size.l || y < 0) {
-            console.log({ size: this.#size, coords })
-            throw new Error('NET: provided Y is out of range');
+            console.warn('NET: provided Y is out of range', { size: this.#size, coords })
+            return undefined;
         }
         const desiredRow = this.net[y];
         return desiredRow.getCellByX(x);
     }
 
-    public initSnake(): Cell[] {
-        const centerRowIndex = Math.round(this.#size.l / 2);
+    public initSnake(): Array<SnakeCell> {
+        const centerRowIndex = Math.round((this.#size.l - 1) / 2);
         const centerRow = this.net[centerRowIndex];
         return centerRow.initSnake();
     }

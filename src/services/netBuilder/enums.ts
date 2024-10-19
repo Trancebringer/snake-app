@@ -5,7 +5,7 @@ export enum SnakePartType {
 }
 
 export enum Direction {
-    south = '\/',
+    south = '\\/',
     north ='^',
     west = '<-',
     east = '->',

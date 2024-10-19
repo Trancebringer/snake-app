@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import SnakeCell from '../snake/snakeCell';
 import { CellContainment, Direction, SnakePartType } from './enums';
 import Row, { InputCellDataList } from './row';
 
@@ -46,6 +47,7 @@ describe('Test Row class', () => {
     test('initSnake puts the snake into row with tail to the left side', () => {
         // Arrange
         const row = new Row(...defaultRowInitData);
+        const initRowLength = row.cells.length;
 
         // Act
         const snake = row.initSnake();
@@ -54,7 +56,10 @@ describe('Test Row class', () => {
 
         // Assert
         // Check that snake returned from method is the same snake from cells
-        expect(snake).toStrictEqual([head, body, tail]);
+        expect(snake).toStrictEqual([head as SnakeCell, body as SnakeCell, tail as SnakeCell]);
+
+        // Check, that initiing a snake did not change row length
+        expect(initRowLength).toBe(row.cells.length) 
 
         // Check the contents of the snake
         snake.forEach((part) => {
@@ -76,6 +81,6 @@ describe('Test Row class', () => {
         // Act
         const data = row.toData();
 
-        expect(data).toStrictEqual([{ coords: { x: 0, y: 0 }, contains: CellContainment.apple, meta: null }, { coords: { x: 1, y: 0 }, contains: CellContainment.empty, meta: null }, { coords: { x: 2, y: 0 }, contains: CellContainment.empty, meta: null }, { coords: { x: 3, y: 0 }, contains: CellContainment.empty, meta: null }, { coords: { x: 4, y: 0 }, contains: CellContainment.empty, meta: null }])
+        expect(data).toStrictEqual([{ coords: { x: 0, y: 0 }, contains: CellContainment.apple, meta: undefined }, { coords: { x: 1, y: 0 }, contains: CellContainment.empty, meta: undefined }, { coords: { x: 2, y: 0 }, contains: CellContainment.empty, meta: undefined }, { coords: { x: 3, y: 0 }, contains: CellContainment.empty, meta: undefined }, { coords: { x: 4, y: 0 }, contains: CellContainment.empty, meta: undefined }])
     })
 })

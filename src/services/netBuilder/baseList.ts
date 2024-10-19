@@ -20,6 +20,6 @@ export default class BaseList {
     }
 
     private getDefaultItemArray(size: number, newItemCb: (i: number, data?: any) => any, startFrom = 0): Cell[] {
-        return Array.from(new Array(size), (el, index) => newItemCb(index + startFrom));
+        return Array.from(new Array(size), (_, index) => newItemCb(index + startFrom));
     }
 }

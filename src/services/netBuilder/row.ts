@@ -1,12 +1,15 @@
 import { MIN_FIELD_SIZE } from "../../constants";
+import { isDataWithSnake } from "../../helpers/isDataWithSnake";
+import SnakeCell from "../snake/snakeCell";
 import BaseList from "./baseList";
-import Cell, { CellData, InputCellDataWithoutCoords } from "./cell";
+import Cell from "./cell";
 import { SnakePartType } from "./enums";
+import { CellData, InputCellDataWithoutCoords } from './interface';
 
 export type InputCellDataList = Array<InputCellDataWithoutCoords>
 
 export default class Row extends BaseList{
-    cells: Cell[];
+    cells: Array<Cell | SnakeCell>;
     readonly #size: number;
     readonly #rowNumber: number;
 
@@ -17,28 +20,36 @@ export default class Row extends BaseList{
         super();
         this.#rowNumber = rowNumber;
         this.#size = size;
-        this.cells = this.listFromData(size, (index, cellData) => new Cell({ ...cellData, coords: { x: index, y: this.#rowNumber } }), data);
+        this.cells = this.listFromData(size, (index, cellData) => {
+            const coords = { x: index, y: this.#rowNumber };
+            if (cellData && isDataWithSnake(cellData)) {
+                return new SnakeCell({ ...cellData, coords });
+            }
+            return new Cell({ ...cellData, coords });
+        }, data);
     }
 
-    public getCellByX(x: number): Cell {
+    public getCellByX(x: number): Cell | SnakeCell {
         if (x > this.#size || x < 0) {
             throw new Error('ROW: provided X is out of range');
         }
         return this.cells[x];
     }
 
-    public initSnake(): Cell[] {
-        const [tail, body, head] = this.cells;
+    public initSnake(): Array<SnakeCell> {
+        const [tail, body, head] = this.cells as Array<Cell>;
         tail.setInitSnakePart(SnakePartType.tail);
         body.setInitSnakePart(SnakePartType.body);
         head.setInitSnakePart(SnakePartType.head);
+        const reversedSnake = [
+            tail.nextState as SnakeCell,
+            body.nextState as SnakeCell,
+            head.nextState as SnakeCell,
+        ]
         this.cells = [
-            tail.nextState,
-            body.nextState,
-            head.nextState,
+            ...reversedSnake,
             ...this.cells.slice(3)
         ]
-        const reversedSnake = this.cells.slice(0, 3);
         return reversedSnake.reverse();
     }
 
